@@ -1,12 +1,87 @@
+"use client";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 
 export default function Home() {
+  const [showDialog, setShowDialog] = useState(false);
+
+  const handleNotification = () => {
+    // 権限の確認とリクエスト
+    if (Notification.permission === "granted") {
+      new Notification("通知が表示されました！", {
+        body: "これは通知の内容です。",
+        icon: "/next.svg", // 任意のアイコン
+      });
+    } else if (Notification.permission !== "denied") {
+      Notification.requestPermission().then((permission) => {
+        if (permission === "granted") {
+          new Notification("通知が表示されました！", {
+            body: "これは通知の内容です。",
+            icon: "/next.svg",
+          });
+        }
+      });
+    } else {
+      Notification.requestPermission().then((permission) => {
+        if (permission === "granted") {
+          new Notification("通知が表示されました！", {
+            body: "これは通知の内容です。",
+            icon: "/next.svg",
+          });
+        } else {
+          setShowDialog(true);
+        }
+      });
+    }
+  };
+
+  const closeDialog = () => {
+    setShowDialog(false);
+  };
+
+  useEffect(() => {
+    console.log("useEffect 発火");
+    if (!("Notification" in window)) {
+      alert("このブラウザは通知をサポートしていません。");
+    }
+  }, []);
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <h1>
-          これはテスト
-        </h1>
+        <button
+          className="rounded-full bg-blue-500 text-white px-4 py-2 hover:bg-blue-600 transition"
+          onClick={handleNotification}
+        >
+          通知を表示
+        </button>
+
+        {showDialog && (
+          <div
+            className="fixed top-0 left-0 w-full h-full bg-black/[.5] flex items-center justify-center"
+            onClick={closeDialog}
+          >
+            <div
+              className="bg-white rounded-lg shadow-lg p-8"
+              onClick={(e) => e.stopPropagation()} // ダイアログ外クリックで閉じない
+            >
+              <h2 className="text-lg font-semibold mb-4">
+                通知の許可が必要です
+              </h2>
+              <p className="mb-4">
+                このアプリでは通知を使用するため、通知を許可してください。
+              </p>
+              <button
+                className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
+                onClick={closeDialog}
+              >
+                閉じる
+              </button>
+            </div>
+          </div>
+        )}
+
+        <h1>これはテスト</h1>
         <Image
           className="dark:invert"
           src="/next.svg"
@@ -15,6 +90,7 @@ export default function Home() {
           height={38}
           priority
         />
+
         <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
           <li className="mb-2">
             <a
